@@ -24,7 +24,7 @@ class TicketFactory extends Factory
             'ticket_number' => Str::upper(Str::random(10)),
             'name' => $this->faker->sentence(6, true),
             'description' => $this->faker->paragraphs(3, true),
-            'status' => $this->faker->randomElement(['open', 'in_progress', 'completed']),
+            'status' => $this->faker->randomElement(['pending','in_progress','completed','onhold']),
             'image_path' => null,
             'created_by' => User::factory(),
             'assigned_to' => null,

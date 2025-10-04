@@ -11,27 +11,42 @@ use App\Http\Requests\StoreTicketRequest;
 
 class TicketController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('ensure.ticket.visible')->only(['show', 'edit', 'update', 'destroy','assign']);
-    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         $user = $request->user();
-        $tickets = Ticket::visibleTo($user)
-        ->with(['author','assignee'])
-        ->orderBy('created_at','desc')
-        ->paginate(10)
-        ->withQueryString();
+        $view = $request->query('view', 'mine'); // default: show "My Tickets"
 
-        return Inertia::render("Tickets/Index",[
-            'tickets' => $tickets
-        ]);
-    }
+        $query = Ticket::with(['author', 'assignee'])
+        ->orderBy('created_at', 'desc');
+
+    // 🧑 Normal users can only see their own tickets (created or assigned)
+        if (!$user->is_admin) {
+            $query->where(function ($q) use ($user) {
+                $q->where('created_by', $user->id)
+                ->orWhere('assigned_to', $user->id);
+            });
+        } else {
+        // 👑 Admin can toggle between all or own
+            if ($view === 'mine') {
+                $query->where(function ($q) use ($user) {
+                    $q->where('created_by', $user->id)
+                    ->orWhere('assigned_to', $user->id);
+            });
+        }
+        // else 'all' => show everything
+        }
+
+        $tickets = $query->paginate(10)->withQueryString();
+        return Inertia::render('Tickets/Index', [
+        'tickets' => $tickets,
+        'view' => $view,
+        'auth' => ['user' => $user],
+    ]);
+}
+
 
     /**
      * Show the form for creating a new resource.
@@ -65,9 +80,20 @@ class TicketController extends Controller
      */
     public function show(Request $request, Ticket $ticket)
     {
-        $ticket->load(['author','assignee']);
-        return Inertia::render('Tickets/Show', ['ticket' => $ticket]);
-    }
+        $ticket->load(['author', 'assignee']);
+
+        $users = [];
+        if ($request->user()->is_admin) {
+            $users = \App\Models\User::select('id', 'name')->get();
+        }
+
+        return \Inertia\Inertia::render('Tickets/Show', [
+            'ticket' => $ticket,
+            'users' => $users, // ✅ pass for reassign dropdown
+            'auth' => ['user' => $request->user()],
+        ]);
+}
+
 
     /**
      * Show the form for editing the specified resource.

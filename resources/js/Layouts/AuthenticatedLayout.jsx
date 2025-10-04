@@ -23,6 +23,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
+                            {/* 🔹 Desktop Navigation Links */}
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
                                     href={route('dashboard')}
@@ -30,9 +31,28 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
+
+                                {/* New Tickets Link */}
+                                <NavLink
+                                    href="/tickets"
+                                    active={route().current('tickets.index')}
+                                >
+                                    Tickets
+                                </NavLink>
+
+                                {/* Optional Admin Users Link */}
+                                {user.is_admin && (
+                                    <NavLink
+                                        href="/users"
+                                        active={route().current('users.index')}
+                                    >
+                                        Users
+                                    </NavLink>
+                                )}
                             </div>
                         </div>
 
+                        {/* 🔹 Right Dropdown (Profile/Logout) */}
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
                             <div className="relative ms-3">
                                 <Dropdown>
@@ -61,9 +81,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </Dropdown.Trigger>
 
                                     <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
-                                        >
+                                        <Dropdown.Link href={route('profile.edit')}>
                                             Profile
                                         </Dropdown.Link>
                                         <Dropdown.Link
@@ -78,6 +96,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
+                        {/* 🔹 Mobile Menu Toggle */}
                         <div className="-me-2 flex items-center sm:hidden">
                             <button
                                 onClick={() =>
@@ -121,6 +140,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                 </div>
 
+                {/* 🔹 Mobile Dropdown Menu */}
                 <div
                     className={
                         (showingNavigationDropdown ? 'block' : 'hidden') +
@@ -134,6 +154,22 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+
+                        <ResponsiveNavLink
+                            href="/tickets"
+                            active={route().current('tickets.index')}
+                        >
+                            Tickets
+                        </ResponsiveNavLink>
+
+                        {user.is_admin && (
+                            <ResponsiveNavLink
+                                href="/users"
+                                active={route().current('users.index')}
+                            >
+                                Users
+                            </ResponsiveNavLink>
+                        )}
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">

@@ -95,6 +95,17 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
             </form>
+
+            {/* 👇 Register link section */}
+            <div className="mt-6 text-center text-sm text-gray-600">
+                Don’t have an account?{' '}
+                <Link
+                    href={route('register')}
+                    className="text-indigo-600 hover:text-indigo-800 font-medium"
+                >
+                    Register
+                </Link>
+            </div>
         </GuestLayout>
     );
 }

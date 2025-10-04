@@ -5,13 +5,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
@@ -25,8 +21,17 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Tickets
+    // Tickets (index, create, store = no visibility middleware)
+    Route::resource('tickets', TicketController::class)->only(['index','create','store']);
+
+    // Tickets (show, edit, update, destroy = with visibility middleware)
     Route::resource('tickets', TicketController::class)
-        ->middleware('ensure.ticket.visible')
-        ->except(['index', 'create', 'store']); // 👈 optional: apply middleware only to show/edit/update/destroy if needed
+        ->only(['show','edit','update','destroy'])
+        ->middleware('ensure.ticket.visible');
+
+    // Users (Admin only)
+    Route::get('/users', [\App\Http\Controllers\UserController::class, 'index'])
+        ->name('users.index');
+
 });
+require __DIR__.'/auth.php';

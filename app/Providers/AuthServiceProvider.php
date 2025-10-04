@@ -28,15 +28,15 @@ class AuthServiceProvider extends ServiceProvider
         // 👇 Define Gates here
 
         Gate::define('view-ticket', fn(User $user, Ticket $ticket) =>
-            $user->id === $ticket->created_by || $user->id === $ticket->assigned_to
+            $user->id === $ticket->created_by || $user->id === $ticket->assigned_to || $user->is_admin
         );
 
         Gate::define('update-ticket', fn(User $user, Ticket $ticket) =>
-            $user->id === $ticket->created_by
+            $user->id === $ticket->created_by || $user->is_admin
         );
 
         Gate::define('assign-ticket', fn(User $user, Ticket $ticket) =>
-            $user->id === $ticket->created_by
+            $user->id === $ticket->created_by || $user->is_admin
         );
 
         Gate::define('update-status', fn(User $user, Ticket $ticket) =>
@@ -44,6 +44,10 @@ class AuthServiceProvider extends ServiceProvider
         );
 
         // Example for user listing (admin only)
+        Gate::define('list-users', fn(User $user) =>
+            $user->is_admin
+        );
+
         Gate::define('list-users', fn(User $user) =>
             $user->is_admin
         );

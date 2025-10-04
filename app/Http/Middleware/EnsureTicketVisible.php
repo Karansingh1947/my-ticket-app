@@ -4,8 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\Ticket;
-use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTicketVisible
@@ -15,19 +13,23 @@ class EnsureTicketVisible
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        $ticketId = $request->route('ticket');
-        if ($ticketId) return $next($request);
+        // thanks to route model binding, this is already a Ticket model
+        $ticket = $request->route('ticket');
 
-        $ticket = Ticket::find($ticketId);
-        if (!Gate::allows('view-ticket', $ticket)) {
-            abort(403, 'Unauthorized action.');
+        if ($ticket && auth()->check()) {
+            $user = $request->user();
+
+            if ($user->is_admin) {
+                return $next($request);
+            }
+
+            if ($ticket->created_by !== $user->id && $ticket->assigned_to !== $user->id) {
+                abort(403, 'Unauthorized action.');
+            }
         }
 
-        // attach ticket to request to avoid reloading
-        $request->attributes->set('ticket', $ticket);
         return $next($request);
-
     }
 }

@@ -60,6 +60,10 @@ class Ticket extends Model
      */
     public function scopeVisibleTo($query, User $user)
     {
+            // ✅ Allow admins to see everything
+        if ($user->is_admin) {
+        return $query;
+    }
         return $query->where('created_by', $user->id)
                      ->orWhere('assigned_to', $user->id);
     }

@@ -1,10 +1,8 @@
-<?php
-
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TicketController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\TicketController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -15,22 +13,19 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/tickets/{ticket}', [\App\Http\Controllers\TicketController::class, 'show'])
-    ->middleware(['auth', 'ensure.ticket.visible'])
-    ->name('tickets.show');
-
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Authenticated routes
 Route::middleware('auth')->group(function () {
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-Route::middleware('auth')->group(function () {
-    Route::resource('tickets', TicketController::class);
+    // Tickets
+    Route::resource('tickets', TicketController::class)
+        ->middleware('ensure.ticket.visible')
+        ->except(['index', 'create', 'store']); // 👈 optional: apply middleware only to show/edit/update/destroy if needed
 });
-
-require __DIR__.'/auth.php';

@@ -2,6 +2,7 @@ services:
   - type: web
     name: my-ticket-app
     env: php
+    plan: free
     buildCommand: |
       composer install
       php artisan key:generate
@@ -14,6 +15,8 @@ services:
         value: production
       - key: APP_DEBUG
         value: false
+      - key: APP_URL
+        value: https://my-ticket-app.onrender.com
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST

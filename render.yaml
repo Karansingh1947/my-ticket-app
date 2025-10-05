@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: my-ticket-app
+    env: php
+    plan: free  # or starter/standard if you want higher performance
+    region: oregon  # or change to 'singapore' / 'frankfurt' / etc
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan key:generate --force
+      php artisan migrate --force
+      npm install
+      npm run build
+    startCommand: php artisan serve --host 0.0.0.0 --port 10000
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        sync: false # You’ll set this manually later in Render Dashboard
+      - key: APP_URL
+        value: https://my-ticket-app.onrender.com
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromDatabase:
+          name: my-ticket-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: my-ticket-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: my-ticket-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: my-ticket-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: my-ticket-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: public
+
+databases:
+  - name: my-ticket-db
+    plan: free
+    region: oregon

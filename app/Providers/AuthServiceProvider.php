@@ -25,7 +25,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // 👇 Define Gates here
+        // Define Gates here
 
         Gate::define('view-ticket', fn(User $user, Ticket $ticket) =>
             $user->id === $ticket->created_by || $user->id === $ticket->assigned_to || $user->is_admin
